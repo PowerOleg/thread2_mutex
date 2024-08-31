@@ -7,7 +7,7 @@
 void refresh_console(const size_t column1, const std::thread::id* thread_ids, const int* progress, const std::string* elapsed_time);
 
 
-void draw(const size_t line_number, std::thread::id* thread_ids, int* progress_line, std::string* elapsed_time, const int iteration_quantity)
+void worker(const size_t line_number, std::thread::id* thread_ids, int* progress_line, std::string* elapsed_time, const int iteration_quantity)
 {
 	double ratio = 20.0 / static_cast<double>(iteration_quantity);//a ratio to transform iteration_quantity into 20 units
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 	std::thread threads[THREADS_QUANTITY];
 	for (size_t i = 0; i < THREADS_QUANTITY; i++)
 	{
-		threads[i] = std::thread(draw, i, std::ref(thread_ids), std::ref(progress_line), std::ref(elapsed_time), ITERATION_QUANTITY);
+		threads[i] = std::thread(worker, i, std::ref(thread_ids), std::ref(progress_line), std::ref(elapsed_time), ITERATION_QUANTITY);
 		threads[i].detach();
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
