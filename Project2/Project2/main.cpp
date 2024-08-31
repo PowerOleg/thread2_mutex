@@ -3,25 +3,40 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <mutex>
+
+std::mutex m1;
+const size_t THREADS_QUANTITY = 4;
+const int ITERATION_QUANTITY = 10;
 
 void refresh_console(const size_t column1, const std::thread::id* thread_ids, const int* progress, const std::string* elapsed_time);
 
 
 void draw(const size_t line_number, std::thread::id* thread_ids, int* progress_line, std::string* elapsed_time, const int iteration_quantity)
 {
-	double ratio = 20.0 / static_cast<double>(iteration_quantity);//a ratio to transform iteration_quantity into 20 units
+	/*double ratio = 20.0 / static_cast<double>(iteration_quantity);//a ratio to transform iteration_quantity into 20 units
 
 	const std::thread::id thread_id = std::this_thread::get_id();
-	thread_ids[line_number] = thread_id;
+	thread_ids[line_number] = thread_id;*/
 
 	auto start = std::chrono::steady_clock::now();
+
+
 	size_t i = 0;
 	int result = 0;
-	while (result < iteration_quantity)//work simulating
+	for (size_t i = 0; i < iteration_quantity; i++)//work simulating
 	{
-		result = ++i / (line_number + 1);
-		progress_line[line_number] = result * ratio;
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::unique_lock<std::mutex> lk1(m1);
+
+		refresh_console(THREADS_QUANTITY, thread_ids, progress_line, elapsed_time);
+		
+
+
+
+
+
+		lk1.unlock();
 	}
 
 	auto end = std::chrono::steady_clock::now();
@@ -55,9 +70,6 @@ void refresh_console(const size_t size, const std::thread::id* thread_ids, const
 
 int main(int argc, char** argv)
 {
-	const size_t THREADS_QUANTITY = 4;
-	const int ITERATION_QUANTITY = 10;
-	const size_t PROGRESS_BAR_LENGTH = 20;
 
 	std::thread::id* thread_ids = new std::thread::id[THREADS_QUANTITY];
 	int* progress_line = new int[THREADS_QUANTITY];
@@ -73,17 +85,18 @@ int main(int argc, char** argv)
 	for (size_t i = 0; i < THREADS_QUANTITY; i++)
 	{
 		threads[i] = std::thread(draw, i, std::ref(thread_ids), std::ref(progress_line), std::ref(elapsed_time), ITERATION_QUANTITY);
-		threads[i].detach();
+		threads[i].join();
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-	int count_end = 0;
+	/*
 	while(elapsed_time[0] == "" || elapsed_time[1] == "" || elapsed_time[2] == "" || elapsed_time[3] == "")
 	{
 		refresh_console(THREADS_QUANTITY, thread_ids, progress_line, elapsed_time);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
-	refresh_console(THREADS_QUANTITY, thread_ids, progress_line, elapsed_time);
+	refresh_console(THREADS_QUANTITY, thread_ids, progress_line, elapsed_time);*/
+
 	delete[] thread_ids;
 	delete[] progress_line;
 	delete[] elapsed_time;
