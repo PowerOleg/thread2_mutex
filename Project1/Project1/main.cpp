@@ -47,7 +47,6 @@ int main(int argc, char** argv)
 	unsigned int cores_quantity = std::thread::hardware_concurrency();
 	std::cout << "Quantity of processor cores - " << cores_quantity << std::endl;
 	int count_max = 10;
-	//std::atomic<int> count = 0;
 	int count = 0;
 	std::thread t1(client_worker, std::ref(count), count_max);
 	std::thread t2(operator_worker, std::ref(count));
