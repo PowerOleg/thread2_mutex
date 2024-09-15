@@ -5,16 +5,16 @@
 #include <vector>
 #include <mutex>
 #include <random>
+#include <math.h>
 
 std::mutex m1;
 char SQUARE = (char)254u;
+std::random_device dev;
+std::mt19937 rng(dev());
 
-
-static void getRandom(int& num, const int range_start, const int range_end)
+void get_random(int& num, const int range_start, const int range_end)
 {
-	std::random_device dev;
-	std::mt19937 rng(dev());
-	std::uniform_int_distribution<std::mt19937::result_type> dist6(range_start, range_end); // distribution in range [1, 6]
+	std::uniform_int_distribution<std::mt19937::result_type> dist6(range_start, range_end); // distribution in range [0, 3000]
 	num = dist6(rng);
 }
 
@@ -45,7 +45,7 @@ void draw(const size_t line_number, std::thread::id* thread_ids, std::string* el
 	auto start = std::chrono::steady_clock::now();
 	for (size_t i = 0; i < iteration_quantity; i++)//work simulating
 	{
-		getRandom(random_num, 0, 3000);
+		get_random(random_num, 0, 3000);
 		std::this_thread::sleep_for(std::chrono::milliseconds(random_num));
 		std::unique_lock<std::mutex> lk1(m1);
 		move_cursor_in_console(x++, y);
@@ -55,14 +55,11 @@ void draw(const size_t line_number, std::thread::id* thread_ids, std::string* el
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<long, std::nano> time = end - start;
 	double d_time = static_cast<double>(time.count()) / 1000000000;
-	if (d_time < 0)
-	{
-		d_time * -1;
-	}
 	elapsed_time[line_number] = std::to_string(d_time);
 
 	std::unique_lock<std::mutex> lk1(m1);
 	move_cursor_in_console(x+12, y);
+	d_time = abs(d_time);
 	std::cout << std::to_string(d_time);
 	lk1.unlock();
 }
