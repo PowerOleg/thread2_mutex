@@ -1,3 +1,22 @@
+####Оператор копирования использует конструктор копирования.
+
+Data::Data(const Data& data) : var(data.var)
+{
+	if (&data == this)
+	{
+		throw std::invalid_argument("Invalid_argument: this object and the argument object are the same");
+	}
+}
+
+Data& Data::operator=(const Data& other_data)
+{
+	if (&other_data == this)
+	{
+		throw std::invalid_argument("Invalid_argument: this object and the argument object are the same");
+	}
+	return *this = Data(other_data);//создается объект используя конструктор копирования
+}
+
 +1)std::lock_guard<std::mutex> lg1(m1) - предсказуемый и !при исключении разблокирует mutex! 
 По принципу RAII блокирует от начала скобочек до конца скобочки(области видимости).
 Принимает только один mutex
